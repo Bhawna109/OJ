@@ -9,7 +9,8 @@ const sendToken = (res, user, statusCode) => {
     res.cookie('token', token, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'lax',
+        sameSite: 'none',
+        secure: true,
     });
     res.status(statusCode).json({
         _id: user._id,
@@ -56,7 +57,7 @@ const login = async (req, res) => {
 };
 
 const logout = (req, res) => {
-    res.cookie('token', '', { maxAge: 0 });
+    res.cookie('token', '', { maxAge: 0, sameSite: 'none', secure: true });
     res.json({ message: 'Logged out successfully' });
 };
 
