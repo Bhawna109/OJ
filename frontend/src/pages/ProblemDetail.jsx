@@ -129,6 +129,11 @@ export default function ProblemDetail() {
   };
 
   const handleAiReview = async () => {
+    if (!user) {
+      setActiveTab('ai');
+      setAiReview('Please login or register to use AI code review.');
+      return;
+    }
     setIsReviewing(true);
     setActiveTab('ai');
     try {
