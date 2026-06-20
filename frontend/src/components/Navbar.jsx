@@ -21,8 +21,9 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-50 shadow-sm">
-      <Link to="/" className="text-xl font-bold text-indigo-600 tracking-tight">
-        BhawnaOJ
+      <Link to="/" className="flex items-center gap-2">
+        <img src="/OJ.jpg" alt="BhawnaOJ" className="h-10 w-auto rounded-lg" />
+        <span className="text-xl font-bold text-blue-900 tracking-tight">BhawnaOJ</span>
       </Link>
 
       <div className="flex items-center gap-6">
@@ -32,8 +33,8 @@ export default function Navbar() {
             to={to}
             className={`text-sm font-medium transition-colors ${
               pathname === to
-                ? 'text-indigo-600 border-b-2 border-indigo-600 pb-0.5'
-                : 'text-gray-600 hover:text-indigo-600'
+                ? 'text-blue-900 border-b-2 border-blue-900 pb-0.5'
+                : 'text-gray-600 hover:text-blue-900'
             }`}
           >
             {label}
@@ -44,7 +45,7 @@ export default function Navbar() {
       <div className="flex items-center gap-3">
         {user ? (
           <>
-            <Link to="/profile" className="text-sm text-gray-700 font-medium hover:text-indigo-600 transition-colors">
+            <Link to="/profile" className="text-sm text-gray-700 font-medium hover:text-blue-900 transition-colors">
               Hi, {user.firstName}
             </Link>
             <button
@@ -58,13 +59,13 @@ export default function Navbar() {
           <>
             <Link
               to="/login"
-              className="text-sm font-medium text-gray-600 hover:text-indigo-600 transition-colors"
+              className="text-sm font-medium text-gray-600 hover:text-blue-900 transition-colors"
             >
               Login
             </Link>
             <Link
               to="/register"
-              className="text-sm font-medium bg-indigo-600 text-white px-4 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors"
+              className="text-sm font-medium bg-blue-900 text-white px-4 py-1.5 rounded-lg hover:bg-blue-800 transition-colors"
             >
               Register
             </Link>
