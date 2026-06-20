@@ -38,7 +38,7 @@ export default function ProblemList() {
             placeholder="Search problems..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-72"
+            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900-500 w-full sm:w-72"
           />
           <div className="flex gap-2">
             {['All', 'Easy', 'Medium', 'Hard'].map((d) => (
@@ -47,8 +47,8 @@ export default function ProblemList() {
                 onClick={() => setFilter(d)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   filter === d
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white border border-gray-300 text-gray-600 hover:border-indigo-400'
+                    ? 'bg-blue-900-600 text-white'
+                    : 'bg-white border border-gray-300 text-gray-600 hover:border-blue-900-400'
                 }`}
               >
                 {d}
@@ -77,7 +77,7 @@ export default function ProblemList() {
                     <td className="px-6 py-4">
                       <Link
                         to={`/problems/${p._id}`}
-                        className="font-medium text-gray-800 hover:text-indigo-600 transition-colors"
+                        className="font-medium text-gray-800 hover:text-blue-900-600 transition-colors"
                       >
                         {p.title}
                       </Link>

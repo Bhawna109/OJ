@@ -47,7 +47,7 @@ export default function Submissions() {
           ) : submissions.length === 0 ? (
             <div className="text-center py-16 text-gray-400">
               No submissions yet.{' '}
-              <Link to="/problems" className="text-indigo-600 hover:underline">Solve a problem</Link>
+              <Link to="/problems" className="text-blue-900 hover:underline">Solve a problem</Link>
             </div>
           ) : (
             <table className="w-full text-sm">
@@ -67,7 +67,7 @@ export default function Submissions() {
                     <td className="px-6 py-4">
                       <Link
                         to={`/problems/${s.problemId?._id}`}
-                        className="font-medium text-indigo-600 hover:underline"
+                        className="font-medium text-blue-900 hover:underline"
                       >
                         {s.problemId?.title || 'Unknown Problem'}
                       </Link>

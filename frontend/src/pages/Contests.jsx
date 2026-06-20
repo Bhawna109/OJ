@@ -71,7 +71,7 @@ function ContestCard({ c, onRegister }) {
             className={`text-sm font-medium px-5 py-2 rounded-lg transition-colors ${
               c.isRegistered
                 ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                : 'bg-blue-900 text-white hover:bg-blue-800'
             }`}
           >
             {c.status === 'Live' ? (c.isRegistered ? '✓ Joined' : 'Join Now') : (c.isRegistered ? '✓ Registered' : 'Register')}

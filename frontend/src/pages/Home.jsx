@@ -20,7 +20,7 @@ export default function Home() {
       {/* Hero */}
       <section className="bg-gray-100 pt-12 pb-0 px-6 text-center">
         <div className="flex justify-center mb-6">
-          <img src="/OJ.jpg" alt="BhawnaOJ" className="h-40 w-auto object-contain" />
+          <img src="/Untitled design(1).png" alt="BhawnaOJ" className="h-40 w-auto object-contain" />
         </div>
       </section>
 

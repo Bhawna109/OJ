@@ -80,13 +80,13 @@ export default function Profile() {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-16 h-16 rounded-full bg-blue-900-600 flex items-center justify-center text-white text-2xl font-bold">
                 {user.firstName[0]}{user.lastName[0]}
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-800">{user.firstName} {user.lastName}</h1>
                 <p className="text-sm text-gray-500">{user.email}</p>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-indigo-100 text-indigo-700'}`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-1 inline-block ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-900-100 text-blue-900-700'}`}>
                   {user.role}
                 </span>
               </div>
@@ -94,7 +94,7 @@ export default function Profile() {
             <div className="flex gap-2">
               {!editing && (
                 <button onClick={() => setEditing(true)}
-                  className="text-sm border border-gray-300 px-4 py-1.5 rounded-lg hover:border-indigo-400 hover:text-indigo-600 transition-colors">
+                  className="text-sm border border-gray-300 px-4 py-1.5 rounded-lg hover:border-blue-900-400 hover:text-blue-900-600 transition-colors">
                   Edit Profile
                 </button>
               )}
@@ -108,15 +108,15 @@ export default function Profile() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-extrabold text-indigo-600">{solved}</div>
+              <div className="text-2xl font-extrabold text-blue-900-600">{solved}</div>
               <div className="text-xs text-gray-500 mt-1">Problems Solved</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-extrabold text-indigo-600">{submissions.length}</div>
+              <div className="text-2xl font-extrabold text-blue-900-600">{submissions.length}</div>
               <div className="text-xs text-gray-500 mt-1">Total Submissions</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-4 text-center">
-              <div className="text-2xl font-extrabold text-indigo-600">
+              <div className="text-2xl font-extrabold text-blue-900-600">
                 {submissions.length > 0 ? Math.round((submissions.filter(s => s.status === 'Accepted').length / submissions.length) * 100) : 0}%
               </div>
               <div className="text-xs text-gray-500 mt-1">Acceptance Rate</div>
@@ -132,22 +132,22 @@ export default function Profile() {
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">First Name</label>
                   <input value={form.firstName} onChange={e => setForm({ ...form, firstName: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900-500" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">Last Name</label>
                   <input value={form.lastName} onChange={e => setForm({ ...form, lastName: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900-500" />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Phone</label>
                 <input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-900-500" />
               </div>
               <div className="flex gap-2 pt-1">
                 <button onClick={handleSave} disabled={saving}
-                  className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:bg-indigo-400 transition-colors">
+                  className="bg-blue-900-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-900-700 disabled:bg-blue-900-400 transition-colors">
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
                 <button onClick={() => { setEditing(false); setError(''); }}
@@ -182,7 +182,7 @@ export default function Profile() {
               <tbody className="divide-y divide-gray-100">
                 {submissions.slice(0, 10).map(s => (
                   <tr key={s._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-3 font-medium text-indigo-600">{s.problemId?.title || '—'}</td>
+                    <td className="px-6 py-3 font-medium text-blue-900-600">{s.problemId?.title || '—'}</td>
                     <td className="px-6 py-3 text-gray-600">{langLabel[s.language] || s.language}</td>
                     <td className="px-6 py-3">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyle[s.status] || 'text-gray-600 bg-gray-100'}`}>
