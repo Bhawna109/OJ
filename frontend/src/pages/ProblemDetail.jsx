@@ -105,7 +105,11 @@ export default function ProblemDetail() {
   };
 
   const handleSubmit = async () => {
-    if (!user) { navigate('/login'); return; }
+    if (!user) {
+      setActiveTab('output');
+      setOutput('Please login or register to submit your solution and track your progress.');
+      return;
+    }
     setIsSubmitting(true);
     setActiveTab('output');
     setSubmitResult(null);

@@ -20,7 +20,7 @@ export default function Home() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white py-24 px-6 text-center">
         <h1 className="text-5xl font-extrabold mb-4 tracking-tight">
-          AlgoU Online Judge
+          BhawnaOJ Online Judge
         </h1>
         <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
           Practice coding, compete in contests, and level up your problem-solving skills — all in one place.
@@ -56,7 +56,7 @@ export default function Home() {
       {/* Features */}
       <section className="py-16 px-6">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">Why AlgoU?</h2>
+          <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">Why BhawnaOJ?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map(({ icon, title, desc }) => (
               <div key={title} className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
