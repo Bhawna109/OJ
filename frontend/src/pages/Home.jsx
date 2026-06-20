@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Logo from '../components/Logo';
 
 const features = [
   { icon: '⚡', title: 'Fast Execution', desc: 'Run C++, Java, and Python code in milliseconds with real-time output.' },
@@ -20,7 +21,7 @@ export default function Home() {
       {/* Hero */}
       <section className="bg-gray-100 pt-12 pb-0 px-6 text-center">
         <div className="flex justify-center mb-6">
-          <img src="/Untitled design(1).png" alt="BhawnaOJ" className="h-40 w-auto object-contain" />
+          <Logo size="lg" />
         </div>
       </section>
 
