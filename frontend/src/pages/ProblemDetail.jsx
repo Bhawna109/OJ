@@ -209,15 +209,15 @@ ${problem.constraints}`;
         <div className="h-56 border-t border-gray-200 bg-white flex flex-col">
           <div className="flex items-center gap-4 px-4 pt-3 border-b border-gray-100">
             <button onClick={() => setActiveTab('input')}
-              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'input' ? 'border-blue-900-600 text-blue-900-600' : 'border-transparent text-gray-500'}`}>
+              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'input' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
               Input
             </button>
             <button onClick={() => setActiveTab('output')}
-              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'output' ? 'border-blue-900-600 text-blue-900-600' : 'border-transparent text-gray-500'}`}>
+              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'output' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
               Output
             </button>
             <button onClick={() => setActiveTab('ai')}
-              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'ai' ? 'border-blue-900-600 text-blue-900-600' : 'border-transparent text-gray-500'}`}>
+              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'ai' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
               AI Review
             </button>
 
@@ -225,7 +225,7 @@ ${problem.constraints}`;
               <select
                 value={language}
                 onChange={handleLanguageChange}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-900-500"
+                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-900"
               >
                 {LANGUAGES.map((l) => (
                   <option key={l.value} value={l.value}>{l.label}</option>
@@ -236,7 +236,7 @@ ${problem.constraints}`;
                 {isRunning ? 'Running...' : 'Run'}
               </button>
               <button onClick={handleSubmit} disabled={isSubmitting}
-                className="bg-blue-900-600 hover:bg-blue-900-700 disabled:bg-blue-900-400 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors">
+                className="bg-blue-900 hover:bg-blue-800 disabled:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors">
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
               <button onClick={handleAiReview} disabled={isReviewing}
