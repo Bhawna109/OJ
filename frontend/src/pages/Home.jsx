@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 
 const features = [
-  { icon: '⚡', title: 'Fast Execution', desc: 'Run C++ code in milliseconds with real-time output.' },
-  { icon: '🤖', title: 'AI Code Review', desc: 'Get instant AI-powered feedback on your code quality.' },
+  { icon: '⚡', title: 'Fast Execution', desc: 'Run C++, Java, and Python code in milliseconds with real-time output.' },
+  { icon: '🤖', title: 'AI Code Review', desc: 'Get instant AI-powered feedback on your code quality and efficiency.' },
   { icon: '🏆', title: 'Contests', desc: 'Compete with others in timed programming contests.' },
   { icon: '📊', title: 'Leaderboard', desc: 'Track your rank and see how you compare globally.' },
 ];
@@ -18,10 +18,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-blue-900 to-blue-700 text-white py-24 px-6 text-center">
-        <h1 className="text-5xl font-extrabold mb-4 tracking-tight">
-          BhawnaOJ Online Judge
-        </h1>
+      <section className="bg-gray-100 pt-12 pb-0 px-6 text-center">
+        <div className="flex justify-center mb-6">
+          <img src="/OJ.jpg" alt="BhawnaOJ" className="h-40 w-auto object-contain" />
+        </div>
+      </section>
+
+      <section className="bg-gradient-to-br from-blue-900 to-blue-700 text-white py-16 px-6 text-center">
         <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
           Practice coding, compete in contests, and level up your problem-solving skills — all in one place.
         </p>
@@ -54,14 +57,14 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="py-16 px-6">
+      <section className="py-16 px-6 bg-gray-50">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-800 text-center mb-10">Why BhawnaOJ?</h2>
+          <h2 className="text-3xl font-bold text-blue-900 text-center mb-10">Why BhawnaOJ?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map(({ icon, title, desc }) => (
-              <div key={title} className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition-shadow">
+              <div key={title} className="bg-white rounded-xl shadow-sm p-6 text-center hover:shadow-md transition-shadow border border-gray-100">
                 <div className="text-4xl mb-3">{icon}</div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
+                <h3 className="text-lg font-semibold text-blue-900 mb-2">{title}</h3>
                 <p className="text-sm text-gray-500">{desc}</p>
               </div>
             ))}
