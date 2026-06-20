@@ -8,13 +8,6 @@ const features = [
   { icon: '📊', title: 'Leaderboard', desc: 'Track your rank and see how you compare globally.' },
 ];
 
-const stats = [
-  { value: '500+', label: 'Problems' },
-  { value: '10K+', label: 'Users' },
-  { value: '50+', label: 'Contests' },
-  { value: '1M+', label: 'Submissions' },
-];
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -45,15 +38,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Description */}
       <section className="bg-white py-12 px-6">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {stats.map(({ value, label }) => (
-            <div key={label}>
-              <div className="text-3xl font-extrabold text-blue-900">{value}</div>
-              <div className="text-sm text-gray-500 mt-1">{label}</div>
-            </div>
-          ))}
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-lg text-gray-600 leading-relaxed">
+            BhawnaOJ is a competitive programming platform where you can practice coding problems, submit solutions, get AI-powered code reviews, and compete in contests — built for developers who want to level up their skills.
+          </p>
         </div>
       </section>
 
