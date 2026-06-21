@@ -25,6 +25,8 @@ const contestRoutes = require('./routes/contests');
 const { protect } = require('./middleware/authMiddleware');
 const TestCase = require('./models/TestCase');
 const Submission = require('./models/Submission');
+const User = require('./models/User');
+const Contest = require('./models/Contest');
 
 const app = express();
 
@@ -51,6 +53,19 @@ const executors = {
 };
 
 app.get('/', (req, res) => res.send('AlgoU OJ Backend'));
+
+app.get('/api/stats', async (req, res) => {
+    try {
+        const [users, submissions, contests] = await Promise.all([
+            User.countDocuments(),
+            Submission.countDocuments(),
+            Contest.countDocuments(),
+        ]);
+        res.json({ users, submissions, contests });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 app.post('/run', async (req, res) => {
     const { language = 'cpp', code, input } = req.body;
@@ -87,6 +102,7 @@ app.post('/api/submit', protect, async (req, res) => {
         let status = 'Accepted';
         let failedOutput = '';
         let failedTestCase = null;
+        const startTime = Date.now();
 
         for (let i = 0; i < testCases.length; i++) {
             const tc = testCases[i];
@@ -108,6 +124,8 @@ app.post('/api/submit', protect, async (req, res) => {
             }
         }
 
+        const executionTime = Date.now() - startTime;
+
         const submission = await Submission.create({
             problemId,
             userId: req.user._id,
@@ -115,6 +133,7 @@ app.post('/api/submit', protect, async (req, res) => {
             language,
             status,
             output: failedOutput,
+            compilationTime: executionTime,
         });
 
         res.status(201).json({ ...submission.toObject(), failedTestCase });

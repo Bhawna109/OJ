@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import Logo from '../components/Logo';
 
 const features = [
@@ -9,6 +11,14 @@ const features = [
 ];
 
 export default function Home() {
+  const [stats, setStats] = useState({ users: 0, submissions: 0, contests: 0 });
+
+  useEffect(() => {
+    axios.get(`${import.meta.env.VITE_API_URL.replace('/api', '')}/api/stats`)
+      .then(res => setStats(res.data))
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
@@ -39,11 +49,25 @@ export default function Home() {
       </section>
 
       {/* Description */}
-      <section className="bg-white py-12 px-6">
+      <section className="bg-white py-10 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-lg text-gray-600 leading-relaxed">
+          <p className="text-lg text-gray-600 leading-relaxed mb-8">
             BhawnaOJ is a competitive programming platform where you can practice coding problems, submit solutions, get AI-powered code reviews, and compete in contests — built for developers who want to level up their skills.
           </p>
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <div className="text-3xl font-extrabold text-blue-900">{stats.users}</div>
+              <div className="text-sm text-gray-500 mt-1">Registered Users</div>
+            </div>
+            <div>
+              <div className="text-3xl font-extrabold text-blue-900">{stats.submissions}</div>
+              <div className="text-sm text-gray-500 mt-1">Submissions Processed</div>
+            </div>
+            <div>
+              <div className="text-3xl font-extrabold text-blue-900">{stats.contests}</div>
+              <div className="text-sm text-gray-500 mt-1">Contests Hosted</div>
+            </div>
+          </div>
         </div>
       </section>
 
