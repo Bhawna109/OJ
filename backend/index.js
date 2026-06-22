@@ -70,13 +70,14 @@ app.get('/api/stats', async (req, res) => {
 app.post('/run', async (req, res) => {
     const { language = 'cpp', code, input } = req.body;
     if (!code) return res.status(400).json({ error: 'Code is required' });
+    if (code.length > 50000) return res.status(400).json({ error: 'Code too large (max 50KB)' });
 
     const execute = executors[language];
     if (!execute) return res.status(400).json({ error: `Unsupported language: ${language}` });
 
     try {
         const filePath = generateFile(language, code);
-        const inputFilePath = generateInputFile(input);
+        const inputFilePath = generateInputFile(input || '');
         const output = await execute(filePath, inputFilePath);
         res.json({ filePath, output });
     } catch (error) {
@@ -89,6 +90,7 @@ app.post('/api/submit', protect, async (req, res) => {
     const { problemId, code, language } = req.body;
     if (!problemId || !code || !language)
         return res.status(400).json({ error: 'problemId, code and language are required' });
+    if (code.length > 50000) return res.status(400).json({ error: 'Code too large (max 50KB)' });
 
     const execute = executors[language];
     if (!execute) return res.status(400).json({ error: `Unsupported language: ${language}` });
@@ -111,7 +113,7 @@ app.post('/api/submit', protect, async (req, res) => {
             try {
                 output = await execute(filePath, inputFilePath);
             } catch (err) {
-                status = err.message.includes('error:') ? 'Compilation Error' : 'Runtime Error';
+                status = err.message.includes('Time Limit Exceeded') ? 'Time Limit Exceeded' : err.message.includes('error:') ? 'Compilation Error' : 'Runtime Error';
                 failedOutput = err.message;
                 failedTestCase = { index: i + 1, input: tc.input, expected: tc.expectedOutput, got: '' };
                 break;
