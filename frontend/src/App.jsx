@@ -11,6 +11,7 @@ import Leaderboard from './pages/Leaderboard';
 import Contests from './pages/Contests';
 import ContestDetail from './pages/ContestDetail';
 import Profile from './pages/Profile';
+import VerifyEmail from './pages/VerifyEmail';
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/contests" element={<Contests />} />
         <Route path="/contests/:id" element={<ContestDetail />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
       </Routes>
       </AuthProvider>
     </BrowserRouter>

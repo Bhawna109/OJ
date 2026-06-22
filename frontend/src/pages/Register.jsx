@@ -10,6 +10,7 @@ export default function Register() {
     firstName: '', lastName: '', email: '', phone: '', password: '', confirmPassword: '',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,8 +25,7 @@ export default function Register() {
         firstName: form.firstName, lastName: form.lastName,
         email: form.email, phone: form.phone, password: form.password,
       }, { withCredentials: true });
-      login(res.data);
-      navigate('/problems');
+      setSuccess(res.data.message);
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
     } finally {
@@ -42,6 +42,7 @@ export default function Register() {
         <p className="text-sm text-gray-500 mb-6">Join BhawnaOJ and start solving problems</p>
 
         {error && <div className="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{error}</div>}
+        {success && <div className="bg-green-50 text-green-700 text-sm px-4 py-3 rounded-lg mb-4">{success}</div>}
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">

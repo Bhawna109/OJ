@@ -57,6 +57,7 @@ export default function Submissions() {
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Problem</th>
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Language</th>
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Status</th>
+                  <th className="text-left px-6 py-3 text-gray-500 font-medium">Time</th>
                   <th className="text-left px-6 py-3 text-gray-500 font-medium">Submitted</th>
                 </tr>
               </thead>
@@ -78,6 +79,7 @@ export default function Submissions() {
                         {s.status}
                       </span>
                     </td>
+                    <td className="px-6 py-4 text-gray-400">{s.compilationTime ? `${s.compilationTime}ms` : '—'}</td>
                     <td className="px-6 py-4 text-gray-400">{timeAgo(s.createdAt)}</td>
                   </tr>
                 ))}
