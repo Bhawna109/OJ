@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Logo from '../components/Logo';
+import { useAuth } from '../context/AuthContext';
 
 const features = [
   { icon: '⚡', title: 'Fast Execution', desc: 'Run C++, Java, and Python code in milliseconds with real-time output.' },
@@ -11,6 +12,7 @@ const features = [
 ];
 
 export default function Home() {
+  const { user } = useAuth();
   const [stats, setStats] = useState({ users: 0, submissions: 0, contests: 0 });
 
   useEffect(() => {
@@ -39,12 +41,14 @@ export default function Home() {
           >
             Start Solving
           </Link>
-          <Link
-            to="/register"
-            className="border border-white text-white font-semibold px-6 py-3 rounded-lg hover:bg-white hover:text-blue-900 transition-colors"
-          >
-            Join Now
-          </Link>
+          {!user && (
+            <Link
+              to="/register"
+              className="border border-white text-white font-semibold px-6 py-3 rounded-lg hover:bg-white hover:text-blue-900 transition-colors"
+            >
+              Join Now
+            </Link>
+          )}
         </div>
       </section>
 
@@ -91,12 +95,21 @@ export default function Home() {
       <section className="bg-blue-900 text-white py-16 px-6 text-center">
         <h2 className="text-3xl font-bold mb-4">Ready to start?</h2>
         <p className="text-blue-100 mb-6">Join thousands of developers improving their skills every day.</p>
-        <Link
-          to="/register"
-          className="bg-white text-blue-900 font-semibold px-8 py-3 rounded-lg hover:bg-blue-50 transition-colors"
-        >
-          Create Free Account
-        </Link>
+        {user ? (
+          <Link
+            to="/problems"
+            className="bg-white text-blue-900 font-semibold px-8 py-3 rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            Start Solving
+          </Link>
+        ) : (
+          <Link
+            to="/register"
+            className="bg-white text-blue-900 font-semibold px-8 py-3 rounded-lg hover:bg-blue-50 transition-colors"
+          >
+            Create Free Account
+          </Link>
+        )}
       </section>
     </div>
   );
