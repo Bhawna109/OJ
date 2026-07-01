@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Editor from 'react-simple-code-editor';
 import ReactMarkdown from 'react-markdown';
@@ -72,7 +72,27 @@ export default function ProblemDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [activeTab, setActiveTab] = useState('output');
-  const [editorExpanded, setEditorExpanded] = useState(false);
+  const [leftWidth, setLeftWidth] = useState(40);
+  const isDragging = useRef(false);
+
+  const handleMouseDown = () => { isDragging.current = true; };
+
+  const handleMouseMove = useCallback((e) => {
+    if (!isDragging.current) return;
+    const pct = (e.clientX / window.innerWidth) * 100;
+    if (pct > 20 && pct < 80) setLeftWidth(pct);
+  }, []);
+
+  const handleMouseUp = () => { isDragging.current = false; };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove]);
 
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/problems/${id}`)
@@ -182,9 +202,9 @@ ${problem.outputFormat}
 ${problem.constraints}`;
 
   return (
-    <div className="h-[calc(100vh-56px)] flex overflow-hidden bg-gray-50">
+    <div className="h-[calc(100vh-56px)] flex overflow-hidden bg-gray-50" style={{ userSelect: isDragging.current ? 'none' : 'auto' }}>
       {/* Left: Problem Description */}
-      <div className="w-2/5 border-r border-gray-200 bg-white flex flex-col overflow-hidden">
+      <div style={{ width: `${leftWidth}%` }} className="border-r border-gray-200 bg-white flex flex-col overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
           <h1 className="text-xl font-bold text-gray-800">{problem.title}</h1>
           <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${difficultyColor[problem.difficulty]}`}>
@@ -203,18 +223,15 @@ ${problem.constraints}`;
         </div>
       </div>
 
-      {/* Right: Editor + I/O */}
+      {/* Draggable Divider */}
       <div
-        style={editorExpanded ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } : {}}
-        className="flex-1 flex flex-col overflow-hidden"
-      >
+        onMouseDown={handleMouseDown}
+        className="w-1 bg-gray-200 hover:bg-blue-900 cursor-col-resize transition-colors"
+      />
+
+      {/* Right: Editor + I/O */}
+      <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto bg-gray-900 relative">
-          <button
-            onClick={() => setEditorExpanded(!editorExpanded)}
-            className="absolute top-2 right-2 z-10 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded transition-colors"
-          >
-            {editorExpanded ? '⊡ Collapse' : '⊞ Expand'}
-          </button>
           <Editor
             value={code}
             onValueChange={handleCodeChange}
