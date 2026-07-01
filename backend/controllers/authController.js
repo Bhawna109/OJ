@@ -31,6 +31,10 @@ const register = async (req, res) => {
         if (!firstName || !lastName || !email || !password)
             return res.status(400).json({ error: 'All fields are required' });
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+        if (!emailRegex.test(email))
+            return res.status(400).json({ error: 'Please enter a valid email address' });
+
         const exists = await User.findOne({ email });
         if (exists) return res.status(400).json({ error: 'Email already registered' });
 
