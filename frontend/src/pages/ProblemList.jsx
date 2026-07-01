@@ -46,11 +46,8 @@ export default function ProblemList() {
               <button
                 key={d}
                 onClick={() => setFilter(d)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filter === d
-                    ? 'bg-blue-900 text-white'
-                    : 'bg-white border border-gray-300 text-gray-600 hover:border-blue-900'
-                }`}
+                style={filter === d ? { backgroundColor: '#1e3a8a', color: 'white' } : {}}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-white border border-gray-300 text-gray-600`}
               >
                 {d}
               </button>

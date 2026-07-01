@@ -77,17 +77,21 @@ export default function ProblemDetail() {
 
   const handleCodeChange = (val) => {
     setCode(val);
-    localStorage.setItem(storageKey, val);
+    localStorage.setItem(`${storageKey}_${language}`, val);
   };
 
   const handleLanguageChange = (e) => {
     const lang = e.target.value;
+    localStorage.setItem(`${storageKey}_${language}`, code);
     setLanguage(lang);
     localStorage.setItem(`${storageKey}_lang`, lang);
     const saved = localStorage.getItem(`${storageKey}_${lang}`);
-    const newCode = saved || defaultCode[lang];
-    setCode(newCode);
-    localStorage.setItem(storageKey, newCode);
+    setCode(saved || defaultCode[lang]);
+  };
+
+  const handleResetCode = () => {
+    setCode(defaultCode[language]);
+    localStorage.removeItem(`${storageKey}_${language}`);
   };
 
   const handleRun = async () => {
@@ -231,6 +235,11 @@ ${problem.constraints}`;
                   <option key={l.value} value={l.value}>{l.label}</option>
                 ))}
               </select>
+              <button onClick={handleResetCode}
+                className="text-sm border border-gray-300 text-gray-600 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors"
+                title="Reset to default template">
+                Reset
+              </button>
               <button onClick={handleRun} disabled={isRunning}
                 className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors">
                 {isRunning ? 'Running...' : 'Run'}
