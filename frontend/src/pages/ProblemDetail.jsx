@@ -204,7 +204,10 @@ ${problem.constraints}`;
       </div>
 
       {/* Right: Editor + I/O */}
-      <div className={`${editorExpanded ? 'fixed inset-0 z-50' : 'flex-1'} flex flex-col overflow-hidden`}>
+      <div
+        style={editorExpanded ? { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 } : {}}
+        className="flex-1 flex flex-col overflow-hidden"
+      >
         <div className="flex-1 overflow-y-auto bg-gray-900 relative">
           <button
             onClick={() => setEditorExpanded(!editorExpanded)}
