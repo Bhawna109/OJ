@@ -8,6 +8,8 @@ const problemSchema = new mongoose.Schema({
     constraints:  { type: String, required: true },
     difficulty:   { type: String, enum: ['Easy', 'Medium', 'Hard'], required: true },
     tags:         [{ type: String }],
+    sampleInput:  { type: String, default: '' },
+    sampleOutput: { type: String, default: '' },
     createdBy:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 }, { timestamps: true });
 

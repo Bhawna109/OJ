@@ -45,7 +45,7 @@ export default function Navbar() {
       <div className="flex items-center gap-3">
         {user ? (
           <>
-            <Link to="/profile" className="text-sm text-gray-700 font-medium hover:text-blue-900 transition-colors">
+            <Link to="/profile" className="text-sm font-medium bg-gray-200 hover:bg-gray-300 text-blue-900 px-4 py-1.5 rounded-lg transition-colors">
               Hi, {user.firstName}
             </Link>
             <button

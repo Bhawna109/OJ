@@ -5,7 +5,11 @@ import ReactMarkdown from 'react-markdown';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
 import 'prismjs/components/prism-javascript';
-import 'prismjs/themes/prism.css';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-python';
+import 'prismjs/themes/prism-tomorrow.css';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
@@ -60,6 +64,7 @@ export default function ProblemDetail() {
   const [language, setLanguage] = useState(savedLang);
   const [code, setCode] = useState(savedCode);
   const [input, setInput] = useState('');
+  const [sampleInput, setSampleInput] = useState('');
   const [output, setOutput] = useState('');
   const [aiReview, setAiReview] = useState('');
   const [submitResult, setSubmitResult] = useState(null);
@@ -67,10 +72,17 @@ export default function ProblemDetail() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [activeTab, setActiveTab] = useState('output');
+  const [editorExpanded, setEditorExpanded] = useState(false);
 
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/problems/${id}`)
-      .then(res => setProblem(res.data))
+      .then(res => {
+        setProblem(res.data);
+        if (res.data.sampleInput) {
+          setInput(res.data.sampleInput);
+          setSampleInput(res.data.sampleInput);
+        }
+      })
       .catch(() => setProblem(null))
       .finally(() => setLoading(false));
   }, [id]);
@@ -192,12 +204,18 @@ ${problem.constraints}`;
       </div>
 
       {/* Right: Editor + I/O */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto bg-gray-900">
+      <div className={`${editorExpanded ? 'fixed inset-0 z-50' : 'flex-1'} flex flex-col overflow-hidden`}>
+        <div className="flex-1 overflow-y-auto bg-gray-900 relative">
+          <button
+            onClick={() => setEditorExpanded(!editorExpanded)}
+            className="absolute top-2 right-2 z-10 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded transition-colors"
+          >
+            {editorExpanded ? '⊡ Collapse' : '⊞ Expand'}
+          </button>
           <Editor
             value={code}
             onValueChange={handleCodeChange}
-            highlight={(code) => highlight(code, languages.clike)}
+            highlight={(code) => highlight(code, language === 'py' ? languages.python : language === 'java' ? languages.java : languages.cpp)}
             padding={16}
             style={{
               fontFamily: '"Fira Code", monospace',
@@ -208,6 +226,7 @@ ${problem.constraints}`;
             }}
           />
         </div>
+        </div>
 
         {/* Bottom Panel */}
         <div className="h-56 border-t border-gray-200 bg-white flex flex-col">
@@ -216,6 +235,12 @@ ${problem.constraints}`;
               className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'input' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
               Input
             </button>
+            {sampleInput && (
+              <button onClick={() => { setInput(sampleInput); setActiveTab('input'); }}
+                className="text-xs text-blue-900 border border-blue-900 px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">
+                Load Sample
+              </button>
+            )}
             <button onClick={() => setActiveTab('output')}
               className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'output' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
               Output

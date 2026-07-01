@@ -36,8 +36,9 @@ export default function Leaderboard() {
                     <div className="text-3xl mb-1">{badges[i]}</div>
                     <div className="font-bold text-gray-800">{l.user.firstName} {l.user.lastName}</div>
                     <div className="text-sm text-gray-500">{l.user.email}</div>
-                    <div className="mt-3 text-2xl font-extrabold text-blue-900">{l.solved}</div>
-                    <div className="text-xs text-gray-400 mt-1">problems solved</div>
+                    <div className="mt-3 text-2xl font-extrabold text-blue-900">{l.solved * 10}</div>
+                    <div className="text-xs text-gray-400 mt-1">points</div>
+                    <div className="text-xs text-gray-500 mt-1">{l.solved} problems solved</div>
                   </div>
                 ))}
               </div>
@@ -50,6 +51,7 @@ export default function Leaderboard() {
                   <tr>
                     <th className="text-left px-6 py-3 text-gray-500 font-medium">Rank</th>
                     <th className="text-left px-6 py-3 text-gray-500 font-medium">User</th>
+                    <th className="text-left px-6 py-3 text-gray-500 font-medium">Points</th>
                     <th className="text-left px-6 py-3 text-gray-500 font-medium">Solved</th>
                     <th className="text-left px-6 py-3 text-gray-500 font-medium">Submissions</th>
                   </tr>
@@ -64,7 +66,8 @@ export default function Leaderboard() {
                         <div className="font-medium text-gray-800">{l.user.firstName} {l.user.lastName}</div>
                         <div className="text-xs text-gray-400">{l.user.email}</div>
                       </td>
-                      <td className="px-6 py-4 font-bold text-blue-900">{l.solved}</td>
+                      <td className="px-6 py-4 font-bold text-blue-900">{l.solved * 10}</td>
+                      <td className="px-6 py-4 text-gray-600">{l.solved}</td>
                       <td className="px-6 py-4 text-gray-600">{l.totalSubmissions}</td>
                     </tr>
                   ))}
