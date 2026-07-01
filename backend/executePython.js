@@ -9,7 +9,7 @@ const executePython = async (filePath, inputFilePath) => {
             { timeout: TIMEOUT_MS },
             (error, stdout, stderr) => {
                 if (error) {
-                    if (error.killed || error.signal === 'SIGTERM') {
+                    if (error.killed || error.signal === 'SIGTERM' || error.signal === 'SIGKILL' || error.code === null) {
                         return reject(new Error('Time Limit Exceeded'));
                     }
                     return reject(new Error(stderr || error.message));

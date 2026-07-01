@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const difficultyColor = {
@@ -13,6 +13,7 @@ export default function ProblemList() {
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_API_URL}/problems`)
@@ -47,8 +48,8 @@ export default function ProblemList() {
                 onClick={() => setFilter(d)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   filter === d
-                    ? 'bg-blue-900-600 text-white'
-                    : 'bg-white border border-gray-300 text-gray-600 hover:border-blue-900-400'
+                    ? 'bg-blue-900 text-white'
+                    : 'bg-white border border-gray-300 text-gray-600 hover:border-blue-900'
                 }`}
               >
                 {d}
@@ -72,15 +73,12 @@ export default function ProblemList() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filtered.map((p, i) => (
-                  <tr key={p._id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={p._id} onClick={() => navigate(`/problems/${p._id}`)} className="hover:bg-gray-50 transition-colors cursor-pointer">
                     <td className="px-6 py-4 text-gray-400">{i + 1}</td>
                     <td className="px-6 py-4">
-                      <Link
-                        to={`/problems/${p._id}`}
-                        className="font-medium text-gray-800 hover:text-blue-900-600 transition-colors"
-                      >
+                      <span className="font-medium text-gray-800 hover:text-blue-900 transition-colors">
                         {p.title}
-                      </Link>
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${difficultyColor[p.difficulty]}`}>

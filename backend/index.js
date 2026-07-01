@@ -138,7 +138,14 @@ app.post('/api/submit', protect, async (req, res) => {
             compilationTime: executionTime,
         });
 
-        res.status(201).json({ ...submission.toObject(), failedTestCase });
+        res.status(201).json({
+            _id: submission._id,
+            status: submission.status,
+            language: submission.language,
+            compilationTime: submission.compilationTime,
+            createdAt: submission.createdAt,
+            failedTestCase,
+        });
     } catch (err) {
         console.error('SUBMIT ERROR:', err.message);
         res.status(500).json({ error: err.message });
