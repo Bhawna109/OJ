@@ -226,7 +226,6 @@ ${problem.constraints}`;
             }}
           />
         </div>
-        </div>
 
         {/* Bottom Panel */}
         <div className="h-56 border-t border-gray-200 bg-white flex flex-col">
