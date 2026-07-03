@@ -16,19 +16,21 @@ const executeJava = async (filePath, inputFilePath) => {
     fs.copyFileSync(filePath, mainJavaPath);
 
     return new Promise((resolve, reject) => {
-        exec(
-            `javac "${mainJavaPath}" && java -cp "${jobDir}" Main < "${inputFilePath}"`,
-            { timeout: TIMEOUT_MS },
-            (error, stdout, stderr) => {
-                if (error) {
-                    if (error.killed || error.signal === 'SIGTERM' || error.signal === 'SIGKILL' || error.code === null) {
+        exec(`javac "${mainJavaPath}" 2>&1`, (compileError, _, compileStderr) => {
+            if (compileError) {
+                return reject(new Error('COMPILE_ERROR:' + (compileStderr || compileError.message)));
+            }
+            exec(`java -cp "${jobDir}" Main < "${inputFilePath}"`, { timeout: TIMEOUT_MS }, (runError, stdout, stderr) => {
+                if (runError) {
+                    if (runError.killed || runError.signal === 'SIGTERM' || runError.signal === 'SIGKILL')
                         return reject(new Error('Time Limit Exceeded'));
-                    }
-                    return reject(new Error(stderr || error.message));
+                    if (stderr && (stderr.includes('OutOfMemoryError') || stderr.includes('Cannot allocate memory')))
+                        return reject(new Error('Memory Limit Exceeded'));
+                    return reject(new Error('RUNTIME_ERROR:' + (stderr || runError.message)));
                 }
                 resolve(stdout);
-            }
-        );
+            });
+        });
     });
 };
 

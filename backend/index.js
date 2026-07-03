@@ -113,7 +113,11 @@ app.post('/api/submit', protect, async (req, res) => {
             try {
                 output = await execute(filePath, inputFilePath);
             } catch (err) {
-                status = err.message.includes('Time Limit Exceeded') ? 'Time Limit Exceeded' : err.message.includes('error:') ? 'Compilation Error' : 'Runtime Error';
+                if (err.message === 'Time Limit Exceeded') status = 'Time Limit Exceeded';
+                else if (err.message === 'Memory Limit Exceeded') status = 'Memory Limit Exceeded';
+                else if (err.message.startsWith('COMPILE_ERROR:')) status = 'Compilation Error';
+                else status = 'Runtime Error';
+                failedOutput = err.message.replace(/^(COMPILE_ERROR:|RUNTIME_ERROR:)/, '');
                 failedOutput = err.message;
                 failedTestCase = { index: i + 1, input: tc.input, expected: tc.expectedOutput, got: '' };
                 break;

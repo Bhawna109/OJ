@@ -12,13 +12,15 @@ const getProblem = async (req, res) => {
 };
 
 const createProblem = async (req, res) => {
-    const { title, statement, inputFormat, outputFormat, constraints, difficulty, tags } = req.body;
+    const { title, statement, inputFormat, outputFormat, constraints, difficulty, tags, sampleInput, sampleOutput } = req.body;
     if (!title || !statement || !inputFormat || !outputFormat || !constraints || !difficulty)
         return res.status(400).json({ error: 'All fields are required' });
 
     const problem = await Problem.create({
         title, statement, inputFormat, outputFormat, constraints, difficulty,
         tags: tags || [],
+        sampleInput: sampleInput || '',
+        sampleOutput: sampleOutput || '',
         createdBy: req.user._id,
     });
     res.status(201).json(problem);

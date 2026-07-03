@@ -47,6 +47,8 @@ const statusColor = {
   'Wrong Answer': 'text-red-700 bg-red-100',
   'Compilation Error': 'text-orange-700 bg-orange-100',
   'Runtime Error': 'text-orange-700 bg-orange-100',
+  'Time Limit Exceeded': 'text-yellow-700 bg-yellow-100',
+  'Memory Limit Exceeded': 'text-purple-700 bg-purple-100',
 };
 
 export default function ProblemDetail() {
