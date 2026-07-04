@@ -120,8 +120,7 @@ app.post('/api/submit', protect, async (req, res) => {
                 else if (err.message.startsWith('COMPILE_ERROR:')) status = 'Compilation Error';
                 else status = 'Runtime Error';
                 failedOutput = err.message.replace(/^(COMPILE_ERROR:|RUNTIME_ERROR:)/, '');
-                failedOutput = err.message;
-                failedTestCase = { index: i + 1, input: tc.input, expected: tc.expectedOutput, got: '' };
+                failedTestCase = { index: i + 1, input: tc.input, expected: tc.expectedOutput, got: failedOutput };
                 break;
             }
             if (output.trim() !== tc.expectedOutput.trim()) {
@@ -151,6 +150,7 @@ app.post('/api/submit', protect, async (req, res) => {
             compilationTime: submission.compilationTime,
             createdAt: submission.createdAt,
             failedTestCase,
+            compilerOutput: ['Compilation Error', 'Runtime Error'].includes(status) ? failedOutput : undefined,
         });
     } catch (err) {
         console.error('SUBMIT ERROR:', err.message);

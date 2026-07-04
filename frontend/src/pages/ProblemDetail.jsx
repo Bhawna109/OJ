@@ -61,7 +61,7 @@ export default function ProblemDetail() {
 
   const storageKey = `code_${id}`;
   const savedLang = localStorage.getItem(`${storageKey}_lang`) || 'cpp';
-  const savedCode = localStorage.getItem(storageKey) || defaultCode[savedLang];
+  const savedCode = localStorage.getItem(`${storageKey}_${savedLang}`) || defaultCode[savedLang];
 
   const [language, setLanguage] = useState(savedLang);
   const [code, setCode] = useState(savedCode);
@@ -314,7 +314,13 @@ ${problem.constraints}`;
                     <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold ${statusColor[submitResult.status] || 'text-gray-700 bg-gray-100'}`}>
                       {submitResult.status === 'Accepted' ? '✓' : '✗'} {submitResult.status}
                     </div>
-                    {submitResult.failedTestCase && (
+                    {submitResult.compilerOutput && (
+                      <div className="mt-2 bg-orange-50 rounded p-3 text-xs">
+                        <div className="text-orange-700 font-medium mb-1">Compiler Output:</div>
+                        <pre className="text-orange-800 whitespace-pre-wrap font-mono">{submitResult.compilerOutput}</pre>
+                      </div>
+                    )}
+                    {submitResult.failedTestCase && !submitResult.compilerOutput && (
                       <div className="text-xs space-y-1.5 mt-2">
                         <div className="text-gray-500 font-medium">Failed on Test Case #{submitResult.failedTestCase.index}</div>
                         <div className="bg-gray-50 rounded p-2">
