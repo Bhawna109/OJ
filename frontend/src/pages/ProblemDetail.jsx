@@ -73,7 +73,7 @@ export default function ProblemDetail() {
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
-  const [activeTab, setActiveTab] = useState('output');
+  const [activeTab, setActiveTab] = useState('input');
   const [leftWidth, setLeftWidth] = useState(40);
   const isDragging = useRef(false);
 
@@ -222,6 +222,23 @@ ${problem.constraints}`;
         </div>
         <div className="flex-1 overflow-y-auto px-6 py-4 prose prose-sm max-w-none text-gray-700">
           <ReactMarkdown>{problemMarkdown}</ReactMarkdown>
+          {problem.sampleInput && (
+            <div className="not-prose mt-4">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Sample Test Case</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1 font-medium">Input</p>
+                  <pre className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs font-mono text-gray-800 whitespace-pre-wrap">{problem.sampleInput}</pre>
+                </div>
+                {problem.sampleOutput && (
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1 font-medium">Expected Output</p>
+                    <pre className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs font-mono text-gray-800 whitespace-pre-wrap">{problem.sampleOutput}</pre>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -314,6 +331,9 @@ ${problem.constraints}`;
                     <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold ${statusColor[submitResult.status] || 'text-gray-700 bg-gray-100'}`}>
                       {submitResult.status === 'Accepted' ? '✓' : '✗'} {submitResult.status}
                     </div>
+                    {submitResult.compilationTime && (
+                      <div className="text-xs text-gray-400">Time: {submitResult.compilationTime}ms</div>
+                    )}
                     {submitResult.compilerOutput && (
                       <div className="mt-2 bg-orange-50 rounded p-3 text-xs">
                         <div className="text-orange-700 font-medium mb-1">Compiler Output:</div>
@@ -341,8 +361,30 @@ ${problem.constraints}`;
                       <div className="text-xs text-green-600 mt-1">All test cases passed!</div>
                     )}
                   </div>
+                ) : output ? (
+                  <div className="space-y-2">
+                    {problem.sampleOutput && input.trim() === (problem.sampleInput || '').trim() ? (
+                      <>
+                        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold ${output.trim() === problem.sampleOutput.trim() ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}`}>
+                          {output.trim() === problem.sampleOutput.trim() ? '✓ Sample Passed' : '✗ Sample Failed'}
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 mt-2 text-xs">
+                          <div>
+                            <p className="text-gray-500 mb-1 font-medium">Your Output</p>
+                            <pre className="bg-gray-50 border border-gray-200 rounded p-2 font-mono whitespace-pre-wrap text-gray-800">{output.trim()}</pre>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 mb-1 font-medium">Expected Output</p>
+                            <pre className="bg-green-50 border border-green-200 rounded p-2 font-mono whitespace-pre-wrap text-green-800">{problem.sampleOutput.trim()}</pre>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <pre className="text-gray-800 whitespace-pre-wrap">{output}</pre>
+                    )}
+                  </div>
                 ) : (
-                  <pre className="text-gray-800 whitespace-pre-wrap">{output || 'Run your code to see output...'}</pre>
+                  <p className="text-gray-400">Run your code to see output...</p>
                 )}
               </>
             )}
