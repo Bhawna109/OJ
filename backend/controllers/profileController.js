@@ -30,4 +30,9 @@ const deleteProfile = async (req, res) => {
     res.json({ message: 'Account deleted successfully' });
 };
 
-module.exports = { getProfile, updateProfile, deleteProfile };
+const getAllUsers = async (req, res) => {
+    const users = await User.find().select('-password -verifyToken -verifyTokenExpiry').sort({ createdAt: -1 });
+    res.json(users);
+};
+
+module.exports = { getProfile, updateProfile, deleteProfile, getAllUsers };

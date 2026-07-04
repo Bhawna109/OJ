@@ -21,6 +21,7 @@ const problemRoutes = require('./routes/problems');
 const submissionRoutes = require('./routes/submissions');
 const leaderboardRoutes = require('./routes/leaderboard');
 const contestRoutes = require('./routes/contests');
+const testcaseRoutes = require('./routes/testcases');
 
 const { protect } = require('./middleware/authMiddleware');
 const TestCase = require('./models/TestCase');
@@ -45,6 +46,7 @@ app.use('/api/problems', problemRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/contests', contestRoutes);
+app.use('/api/testcases', testcaseRoutes);
 
 const executors = {
     cpp: executeCpp,
