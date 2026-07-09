@@ -20,7 +20,8 @@ export default function Leaderboard() {
     <div className="min-h-screen bg-gray-50 px-6 py-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Leaderboard</h1>
-        <p className="text-gray-500 mb-6">Ranked by problems solved</p>
+        <p className="text-gray-500 mb-1">Ranked by problems solved</p>
+        <p className="text-xs text-gray-400 mb-6">Points = problems solved × 10</p>
 
         {leaders.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-16 text-center text-gray-400">

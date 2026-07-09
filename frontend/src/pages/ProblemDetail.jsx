@@ -73,7 +73,7 @@ export default function ProblemDetail() {
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
-  const [activeTab, setActiveTab] = useState('input');
+  const [activeTab, setActiveTab] = useState('testcases');
   const [leftWidth, setLeftWidth] = useState(40);
   const isDragging = useRef(false);
 
@@ -130,7 +130,7 @@ export default function ProblemDetail() {
 
   const handleRun = async () => {
     setIsRunning(true);
-    setActiveTab('output');
+    setActiveTab('result');
     setSubmitResult(null);
     try {
       const { data } = await axios.post(import.meta.env.VITE_BACKEND_URL, { language, code, input });
@@ -149,7 +149,7 @@ export default function ProblemDetail() {
       return;
     }
     setIsSubmitting(true);
-    setActiveTab('output');
+    setActiveTab('result');
     setSubmitResult(null);
     try {
       const { data } = await axios.post(
@@ -267,21 +267,15 @@ ${problem.constraints}`;
         </div>
 
         {/* Bottom Panel */}
-        <div className="h-56 border-t border-gray-200 bg-white flex flex-col">
-          <div className="flex items-center gap-4 px-4 pt-3 border-b border-gray-100">
-            <button onClick={() => setActiveTab('input')}
-              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'input' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
-              Input
+        <div className="h-72 border-t border-gray-200 bg-white flex flex-col">
+          <div className="flex items-center gap-4 px-4 pt-2 border-b border-gray-100">
+            <button onClick={() => setActiveTab('testcases')}
+              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'testcases' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
+              Test Cases
             </button>
-            {sampleInput && (
-              <button onClick={() => { setInput(sampleInput); setActiveTab('input'); }}
-                className="text-xs text-blue-900 border border-blue-900 px-2 py-0.5 rounded hover:bg-blue-50 transition-colors">
-                Load Sample
-              </button>
-            )}
-            <button onClick={() => setActiveTab('output')}
-              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'output' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
-              Output
+            <button onClick={() => setActiveTab('result')}
+              className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'result' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
+              Result
             </button>
             <button onClick={() => setActiveTab('ai')}
               className={`text-sm pb-2 font-medium border-b-2 transition-colors ${activeTab === 'ai' ? 'border-blue-900 text-blue-900' : 'border-transparent text-gray-500'}`}>
@@ -289,11 +283,8 @@ ${problem.constraints}`;
             </button>
 
             <div className="ml-auto flex items-center gap-2">
-              <select
-                value={language}
-                onChange={handleLanguageChange}
-                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-900"
-              >
+              <select value={language} onChange={handleLanguageChange}
+                className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-900">
                 {LANGUAGES.map((l) => (
                   <option key={l.value} value={l.value}>{l.label}</option>
                 ))}
@@ -318,14 +309,36 @@ ${problem.constraints}`;
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 text-sm font-mono">
-            {activeTab === 'input' && (
-              <textarea value={input} onChange={(e) => setInput(e.target.value)}
-                placeholder="Enter input..."
-                className="w-full h-full resize-none focus:outline-none text-gray-700 text-sm" />
+          <div className="flex-1 overflow-y-auto p-3 text-sm">
+            {activeTab === 'testcases' && (
+              <div className="flex flex-col h-full gap-2">
+                {problem.sampleInput && (
+                  <div className="border border-gray-100 rounded-lg p-2 bg-gray-50">
+                    <div className="text-xs font-medium text-gray-500 mb-1.5">Sample Test Case</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <div className="text-xs text-gray-400 mb-0.5">Input</div>
+                        <pre className="bg-white border border-gray-200 rounded px-2 py-1 text-xs font-mono text-gray-700 whitespace-pre-wrap max-h-14 overflow-y-auto">{problem.sampleInput}</pre>
+                      </div>
+                      {problem.sampleOutput && (
+                        <div>
+                          <div className="text-xs text-gray-400 mb-0.5">Expected Output</div>
+                          <pre className="bg-white border border-gray-200 rounded px-2 py-1 text-xs font-mono text-gray-700 whitespace-pre-wrap max-h-14 overflow-y-auto">{problem.sampleOutput}</pre>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="text-xs font-medium text-gray-500 mb-1">Custom Input</div>
+                  <textarea value={input} onChange={(e) => setInput(e.target.value)}
+                    placeholder="Enter custom input here..."
+                    className="flex-1 resize-none focus:outline-none text-gray-700 text-sm font-mono bg-gray-50 border border-gray-100 rounded p-2" />
+                </div>
+              </div>
             )}
-            {activeTab === 'output' && (
-              <>
+            {activeTab === 'result' && (
+              <div className="font-mono">
                 {submitResult ? (
                   <div className="space-y-2">
                     <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold ${statusColor[submitResult.status] || 'text-gray-700 bg-gray-100'}`}>
@@ -343,17 +356,15 @@ ${problem.constraints}`;
                     {submitResult.failedTestCase && !submitResult.compilerOutput && (
                       <div className="text-xs space-y-1.5 mt-2">
                         <div className="text-gray-500 font-medium">Failed on Test Case #{submitResult.failedTestCase.index}</div>
-                        <div className="bg-gray-50 rounded p-2">
-                          <span className="text-gray-400">Input:</span>
-                          <pre className="text-gray-700 mt-0.5">{submitResult.failedTestCase.input}</pre>
-                        </div>
-                        <div className="bg-green-50 rounded p-2">
-                          <span className="text-gray-400">Expected:</span>
-                          <pre className="text-green-700 mt-0.5">{submitResult.failedTestCase.expected}</pre>
-                        </div>
-                        <div className="bg-red-50 rounded p-2">
-                          <span className="text-gray-400">Your Output:</span>
-                          <pre className="text-red-700 mt-0.5">{submitResult.failedTestCase.got || '(empty)'}</pre>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-red-50 rounded p-2">
+                            <span className="text-gray-400 block mb-0.5">Your Output:</span>
+                            <pre className="text-red-700">{submitResult.failedTestCase.got || '(empty)'}</pre>
+                          </div>
+                          <div className="bg-green-50 rounded p-2">
+                            <span className="text-gray-400 block mb-0.5">Expected:</span>
+                            <pre className="text-green-700">{submitResult.failedTestCase.expected}</pre>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -366,27 +377,27 @@ ${problem.constraints}`;
                     {problem.sampleOutput && input.trim() === (problem.sampleInput || '').trim() ? (
                       <>
                         <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold ${output.trim() === problem.sampleOutput.trim() ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'}`}>
-                          {output.trim() === problem.sampleOutput.trim() ? '✓ Sample Passed' : '✗ Sample Failed'}
+                          {output.trim() === problem.sampleOutput.trim() ? '✓ Sample Passed' : '✗ Wrong Answer'}
                         </div>
-                        <div className="grid grid-cols-2 gap-3 mt-2 text-xs">
-                          <div>
-                            <p className="text-gray-500 mb-1 font-medium">Your Output</p>
-                            <pre className="bg-gray-50 border border-gray-200 rounded p-2 font-mono whitespace-pre-wrap text-gray-800">{output.trim()}</pre>
+                        <div className="grid grid-cols-2 gap-2 mt-1 text-xs">
+                          <div className="bg-red-50 border border-red-100 rounded p-2">
+                            <p className="text-gray-500 mb-0.5 font-medium">Your Output</p>
+                            <pre className="font-mono whitespace-pre-wrap text-gray-800">{output.trim()}</pre>
                           </div>
-                          <div>
-                            <p className="text-gray-500 mb-1 font-medium">Expected Output</p>
-                            <pre className="bg-green-50 border border-green-200 rounded p-2 font-mono whitespace-pre-wrap text-green-800">{problem.sampleOutput.trim()}</pre>
+                          <div className="bg-green-50 border border-green-100 rounded p-2">
+                            <p className="text-gray-500 mb-0.5 font-medium">Expected Output</p>
+                            <pre className="font-mono whitespace-pre-wrap text-green-800">{problem.sampleOutput.trim()}</pre>
                           </div>
                         </div>
                       </>
                     ) : (
-                      <pre className="text-gray-800 whitespace-pre-wrap">{output}</pre>
+                      <pre className="text-gray-800 whitespace-pre-wrap text-sm">{output}</pre>
                     )}
                   </div>
                 ) : (
-                  <p className="text-gray-400">Run your code to see output...</p>
+                  <p className="text-gray-400 text-sm">Run your code to see output...</p>
                 )}
-              </>
+              </div>
             )}
             {activeTab === 'ai' && (
               <div className="prose prose-sm max-w-none overflow-y-auto">
