@@ -14,4 +14,4 @@ const generateFile = (language, code) => {
     fs.writeFileSync(filePath, code);
     return filePath;
 };
-exports = module.exports = generateFile;    
+exports = module.exports = generateFile;

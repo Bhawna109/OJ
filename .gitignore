@@ -14,6 +14,9 @@ build/
 backend/codes/
 backend/outputs/
 backend/inputs/
+compiler-service/codes/
+compiler-service/outputs/
+compiler-service/inputs/
 
 # Logs
 *.log

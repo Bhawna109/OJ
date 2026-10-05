@@ -8,12 +8,28 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const generateFile = require('./generateFile');
-const executeCpp = require('./executeCpp');
-const executeJava = require('./executeJava');
-const executePython = require('./executePython');
-const generateInputFile = require('./generateInputFile');
+const { codeLimiter, aiLimiter, authLimiter } = require('./middleware/rateLimiter');
 const aiCodeReview = require('./aiCodeReview');
+
+// The compiler microservice runs untrusted code in isolation. The backend
+// never executes code itself — it delegates over HTTP to this service.
+const COMPILER_URL = process.env.COMPILER_URL || 'http://localhost:7000';
+const SUPPORTED_LANGUAGES = ['cpp', 'java', 'py'];
+
+// Sends one execution job to the compiler service.
+// Returns { output } on success, or { status, error } on a known failure.
+async function runOnCompiler(language, code, input) {
+    const resp = await fetch(`${COMPILER_URL}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language, code, input }),
+    });
+    if (!resp.ok) {
+        const body = await resp.json().catch(() => ({}));
+        throw new Error(body.error || `Compiler service error (${resp.status})`);
+    }
+    return resp.json();
+}
 
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
@@ -31,6 +47,9 @@ const Contest = require('./models/Contest');
 
 const app = express();
 
+// Behind Nginx — trust the first proxy so rate limiting sees the real client IP
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: ['http://localhost:5173', 'https://oj-puce.vercel.app'],
   credentials: true
@@ -40,6 +59,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // API routes
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/problems', problemRoutes);
@@ -47,12 +68,6 @@ app.use('/api/submissions', submissionRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/contests', contestRoutes);
 app.use('/api/testcases', testcaseRoutes);
-
-const executors = {
-    cpp: executeCpp,
-    java: executeJava,
-    py: executePython,
-};
 
 app.get('/', (req, res) => res.send('AlgoU OJ Backend'));
 
@@ -69,40 +84,35 @@ app.get('/api/stats', async (req, res) => {
     }
 });
 
-app.post('/run', async (req, res) => {
+app.post('/run', codeLimiter, async (req, res) => {
     const { language = 'cpp', code, input } = req.body;
     if (!code) return res.status(400).json({ error: 'Code is required' });
     if (code.length > 50000) return res.status(400).json({ error: 'Code too large (max 50KB)' });
-
-    const execute = executors[language];
-    if (!execute) return res.status(400).json({ error: `Unsupported language: ${language}` });
+    if (!SUPPORTED_LANGUAGES.includes(language)) return res.status(400).json({ error: `Unsupported language: ${language}` });
 
     try {
-        const filePath = generateFile(language, code);
-        const inputFilePath = generateInputFile(input || '');
-        const output = await execute(filePath, inputFilePath);
-        res.json({ filePath, output });
+        const result = await runOnCompiler(language, code, input || '');
+        // On a compile/runtime/TLE/MLE failure, show the message in the output panel
+        if (result.status) return res.json({ output: result.error });
+        res.json({ output: result.output });
     } catch (error) {
         console.error('RUN ERROR:', error.message);
-        res.status(500).json({ error: error.message });
+        res.status(503).json({ error: 'Execution service unavailable. Please try again.' });
     }
 });
 
-app.post('/api/submit', protect, async (req, res) => {
+app.post('/api/submit', codeLimiter, protect, async (req, res) => {
     const { problemId, code, language } = req.body;
     if (!problemId || !code || !language)
         return res.status(400).json({ error: 'problemId, code and language are required' });
     if (code.length > 50000) return res.status(400).json({ error: 'Code too large (max 50KB)' });
-
-    const execute = executors[language];
-    if (!execute) return res.status(400).json({ error: `Unsupported language: ${language}` });
+    if (!SUPPORTED_LANGUAGES.includes(language)) return res.status(400).json({ error: `Unsupported language: ${language}` });
 
     try {
         const testCases = await TestCase.find({ problemId });
         if (testCases.length === 0)
             return res.status(404).json({ error: 'No test cases found for this problem' });
 
-        const filePath = generateFile(language, code);
         let status = 'Accepted';
         let failedOutput = '';
         let failedTestCase = null;
@@ -110,19 +120,15 @@ app.post('/api/submit', protect, async (req, res) => {
 
         for (let i = 0; i < testCases.length; i++) {
             const tc = testCases[i];
-            const inputFilePath = generateInputFile(tc.input);
-            let output;
-            try {
-                output = await execute(filePath, inputFilePath);
-            } catch (err) {
-                if (err.message === 'Time Limit Exceeded') status = 'Time Limit Exceeded';
-                else if (err.message === 'Memory Limit Exceeded') status = 'Memory Limit Exceeded';
-                else if (err.message.startsWith('COMPILE_ERROR:')) status = 'Compilation Error';
-                else status = 'Runtime Error';
-                failedOutput = err.message.replace(/^(COMPILE_ERROR:|RUNTIME_ERROR:)/, '');
+            const result = await runOnCompiler(language, code, tc.input);
+            if (result.status) {
+                // Known execution failure: TLE / MLE / Compilation Error / Runtime Error
+                status = result.status;
+                failedOutput = result.error;
                 failedTestCase = { index: i + 1, input: tc.input, expected: tc.expectedOutput, got: failedOutput };
                 break;
             }
+            const output = result.output;
             if (output.trim() !== tc.expectedOutput.trim()) {
                 status = 'Wrong Answer';
                 failedOutput = output.trim();
@@ -158,7 +164,7 @@ app.post('/api/submit', protect, async (req, res) => {
     }
 });
 
-app.post('/ai-review', async (req, res) => {
+app.post('/ai-review', aiLimiter, async (req, res) => {
     const { code } = req.body;
     if (!code) return res.status(400).json({ error: 'Code is required' });
     try {

@@ -1,0 +1,26 @@
+# BhawnaOJ — backend + isolated compiler service.
+#
+# Local dev/test:   docker compose up --build
+# Push images:      docker compose push          (after docker login)
+# On EC2:           docker compose pull && docker compose up -d
+#
+# The compiler service has NO ports exposed to the host — it is only reachable
+# by the backend over the private Docker network at http://compiler:7000.
+services:
+  compiler:
+    build: ./compiler-service
+    image: bhawnapatel25/algou-compiler:latest
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    image: bhawnapatel25/algou-backend:latest
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ${BACKEND_ENV:-./backend/.env}
+    environment:
+      - COMPILER_URL=http://compiler:7000
+    depends_on:
+      - compiler
