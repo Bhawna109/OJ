@@ -1,12 +1,17 @@
-# BhawnaOJ — backend + isolated compiler service.
+# BhawnaOJ — backend API + queue worker + isolated compiler + Redis.
 #
 # Local dev/test:   docker compose up --build
 # Push images:      docker compose push          (after docker login)
 # On EC2:           docker compose pull && docker compose up -d
 #
 # The compiler service has NO ports exposed to the host — it is only reachable
-# by the backend over the private Docker network at http://compiler:7000.
+# by the backend/worker over the private Docker network at http://compiler:7000.
+# Redis is likewise internal-only (the job queue).
 services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
   compiler:
     build: ./compiler-service
     image: bhawnapatel25/algou-compiler:latest
@@ -22,5 +27,21 @@ services:
       - ${BACKEND_ENV:-./backend/.env}
     environment:
       - COMPILER_URL=http://compiler:7000
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - compiler
+      - redis
+
+  worker:
+    build: ./backend
+    image: bhawnapatel25/algou-backend:latest
+    restart: unless-stopped
+    command: node worker.js
+    env_file:
+      - ${BACKEND_ENV:-./backend/.env}
+    environment:
+      - COMPILER_URL=http://compiler:7000
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - compiler
+      - redis

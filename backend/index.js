@@ -10,26 +10,8 @@ dotenv.config();
 
 const { codeLimiter, aiLimiter, authLimiter } = require('./middleware/rateLimiter');
 const aiCodeReview = require('./aiCodeReview');
-
-// The compiler microservice runs untrusted code in isolation. The backend
-// never executes code itself — it delegates over HTTP to this service.
-const COMPILER_URL = process.env.COMPILER_URL || 'http://localhost:7000';
-const SUPPORTED_LANGUAGES = ['cpp', 'java', 'py'];
-
-// Sends one execution job to the compiler service.
-// Returns { output } on success, or { status, error } on a known failure.
-async function runOnCompiler(language, code, input) {
-    const resp = await fetch(`${COMPILER_URL}/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ language, code, input }),
-    });
-    if (!resp.ok) {
-        const body = await resp.json().catch(() => ({}));
-        throw new Error(body.error || `Compiler service error (${resp.status})`);
-    }
-    return resp.json();
-}
+const { runOnCompiler, SUPPORTED_LANGUAGES } = require('./compilerClient');
+const { submissionQueue } = require('./queue');
 
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
@@ -113,51 +95,25 @@ app.post('/api/submit', codeLimiter, protect, async (req, res) => {
         if (testCases.length === 0)
             return res.status(404).json({ error: 'No test cases found for this problem' });
 
-        let status = 'Accepted';
-        let failedOutput = '';
-        let failedTestCase = null;
-        const startTime = Date.now();
-
-        for (let i = 0; i < testCases.length; i++) {
-            const tc = testCases[i];
-            const result = await runOnCompiler(language, code, tc.input);
-            if (result.status) {
-                // Known execution failure: TLE / MLE / Compilation Error / Runtime Error
-                status = result.status;
-                failedOutput = result.error;
-                failedTestCase = { index: i + 1, input: tc.input, expected: tc.expectedOutput, got: failedOutput };
-                break;
-            }
-            const output = result.output;
-            if (output.trim() !== tc.expectedOutput.trim()) {
-                status = 'Wrong Answer';
-                failedOutput = output.trim();
-                failedTestCase = { index: i + 1, input: tc.input, expected: tc.expectedOutput, got: output.trim() };
-                break;
-            }
-        }
-
-        const executionTime = Date.now() - startTime;
-
+        // Create the submission as Pending, enqueue the judging job, and return
+        // immediately. The worker processes it and updates the status; the
+        // frontend polls GET /api/submissions/:id for the result.
         const submission = await Submission.create({
             problemId,
             userId: req.user._id,
             code,
             language,
-            status,
-            output: failedOutput,
-            compilationTime: executionTime,
+            status: 'Pending',
         });
 
-        res.status(201).json({
-            _id: submission._id,
-            status: submission.status,
-            language: submission.language,
-            compilationTime: submission.compilationTime,
-            createdAt: submission.createdAt,
-            failedTestCase,
-            compilerOutput: ['Compilation Error', 'Runtime Error'].includes(status) ? failedOutput : undefined,
+        await submissionQueue.add('judge', {
+            submissionId: submission._id.toString(),
+            problemId,
+            code,
+            language,
         });
+
+        res.status(202).json({ submissionId: submission._id, status: 'Pending' });
     } catch (err) {
         console.error('SUBMIT ERROR:', err.message);
         res.status(500).json({ error: err.message });

@@ -144,24 +144,57 @@ export default function ProblemDetail() {
 
   const handleSubmit = async () => {
     if (!user) {
-      setActiveTab('output');
+      setActiveTab('result');
       setOutput('Please login or register to submit your solution and track your progress.');
       return;
     }
     setIsSubmitting(true);
     setActiveTab('result');
     setSubmitResult(null);
+    setOutput('');
     try {
+      // Submit returns immediately with a Pending submission; the worker judges
+      // it asynchronously. Poll until the status is final.
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_URL}/submit`,
         { problemId: id, code, language },
         { withCredentials: true }
       );
-      setSubmitResult(data);
-      setOutput('');
+      const submissionId = data.submissionId;
+
+      const poll = async (attempts = 0) => {
+        if (attempts > 60) {
+          setOutput('Judging is taking longer than expected. Check "Submissions" in a moment.');
+          setIsSubmitting(false);
+          return;
+        }
+        try {
+          const { data: sub } = await axios.get(
+            `${import.meta.env.VITE_API_URL}/submissions/${submissionId}`,
+            { withCredentials: true }
+          );
+          if (sub.status === 'Pending') {
+            setTimeout(() => poll(attempts + 1), 1500);
+            return;
+          }
+          setSubmitResult({
+            _id: sub._id,
+            status: sub.status,
+            language: sub.language,
+            compilationTime: sub.compilationTime,
+            createdAt: sub.createdAt,
+            failedTestCase: sub.failedTestCase,
+            compilerOutput: ['Compilation Error', 'Runtime Error'].includes(sub.status) ? sub.output : undefined,
+          });
+          setIsSubmitting(false);
+        } catch (err) {
+          setOutput('Error checking submission: ' + (err.response?.data?.error || err.message));
+          setIsSubmitting(false);
+        }
+      };
+      poll();
     } catch (error) {
       setOutput('Submit error: ' + (error.response?.data?.error || error.message));
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -371,6 +404,10 @@ ${problem.constraints}`;
                     {submitResult.status === 'Accepted' && (
                       <div className="text-xs text-green-600 mt-1">All test cases passed!</div>
                     )}
+                  </div>
+                ) : isSubmitting ? (
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-blue-900 bg-blue-100">
+                    <span className="animate-pulse">●</span> Judging your submission...
                   </div>
                 ) : output ? (
                   <div className="space-y-2">

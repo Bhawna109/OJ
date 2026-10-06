@@ -2,11 +2,17 @@
 #
 # Deploy:  docker compose -f docker-compose.prod.yml pull
 #          docker compose -f docker-compose.prod.yml up -d
+# (on EC2 this file is saved as /home/ec2-user/docker-compose.yml, so plain
+#  `docker compose pull && docker compose up -d` works)
 #
 # Expects the backend secrets at /home/ec2-user/.env
-# The compiler service has NO host ports — only the backend can reach it
-# over the private Docker network at http://compiler:7000.
+# compiler + redis have NO host ports — only backend/worker reach them over
+# the private Docker network.
 services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
   compiler:
     image: bhawnapatel25/algou-compiler:latest
     restart: unless-stopped
@@ -20,5 +26,20 @@ services:
       - /home/ec2-user/.env
     environment:
       - COMPILER_URL=http://compiler:7000
+      - REDIS_URL=redis://redis:6379
     depends_on:
       - compiler
+      - redis
+
+  worker:
+    image: bhawnapatel25/algou-backend:latest
+    restart: unless-stopped
+    command: node worker.js
+    env_file:
+      - /home/ec2-user/.env
+    environment:
+      - COMPILER_URL=http://compiler:7000
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - compiler
+      - redis
