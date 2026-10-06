@@ -11,7 +11,10 @@ import 'prismjs/components/prism-java';
 import 'prismjs/components/prism-python';
 import 'prismjs/themes/prism-tomorrow.css';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
+
+const SOCKET_URL = import.meta.env.VITE_API_URL.replace('/api', '');
 
 const LANGUAGES = [
   { label: 'C++', value: 'cpp' },
@@ -134,7 +137,16 @@ export default function ProblemDetail() {
     setSubmitResult(null);
     try {
       const { data } = await axios.post(import.meta.env.VITE_BACKEND_URL, { language, code, input });
-      setOutput(data.output || '(no output)');
+      let out = data.output || '(no output)';
+      // If the program tried to read input but the Custom Input box was empty,
+      // the raw EOF error is confusing — point the user to where they add input.
+      const readEmptyStdin = !input.trim() &&
+        /EOFError|NoSuchElementException|No line found|EOF when reading|InputMismatchException/.test(out);
+      if (readEmptyStdin) {
+        out += '\n\n⚠️ Your program is waiting for input, but the Custom Input box is empty.\n' +
+               'Open the "Test Cases" tab, type your input under "Custom Input", then click Run again.';
+      }
+      setOutput(out);
     } catch (error) {
       setOutput('Error: ' + (error.response?.data?.error || error.message));
     } finally {
@@ -154,7 +166,8 @@ export default function ProblemDetail() {
     setOutput('');
     try {
       // Submit returns immediately with a Pending submission; the worker judges
-      // it asynchronously. Poll until the status is final.
+      // it asynchronously. A WebSocket pushes the result the instant it's ready,
+      // with polling as a fallback in case the socket can't connect.
       const { data } = await axios.post(
         `${import.meta.env.VITE_API_URL}/submit`,
         { problemId: id, code, language },
@@ -162,10 +175,38 @@ export default function ProblemDetail() {
       );
       const submissionId = data.submissionId;
 
+      let settled = false;
+      let socket = null;
+      const finish = (sub) => {
+        if (settled) return;
+        settled = true;
+        setSubmitResult({
+          _id: sub._id || sub.submissionId,
+          status: sub.status,
+          language: sub.language,
+          compilationTime: sub.compilationTime,
+          createdAt: sub.createdAt,
+          failedTestCase: sub.failedTestCase,
+          compilerOutput: sub.compilerOutput !== undefined
+            ? sub.compilerOutput
+            : (['Compilation Error', 'Runtime Error'].includes(sub.status) ? sub.output : undefined),
+        });
+        setIsSubmitting(false);
+        if (socket) socket.disconnect();
+      };
+
+      // Primary: WebSocket push
+      socket = io(SOCKET_URL, { withCredentials: true });
+      socket.on('connect', () => socket.emit('subscribe', submissionId));
+      socket.on('result', (sub) => {
+        if (sub && sub.status && sub.status !== 'Pending') finish(sub);
+      });
+
+      // Fallback: poll every 3s (also covers rare infra failures the socket won't push)
       const poll = async (attempts = 0) => {
-        if (attempts > 60) {
-          setOutput('Judging is taking longer than expected. Check "Submissions" in a moment.');
-          setIsSubmitting(false);
+        if (settled) return;
+        if (attempts > 40) {
+          if (!settled) { setOutput('Judging is taking longer than expected. Check "Submissions" in a moment.'); setIsSubmitting(false); if (socket) socket.disconnect(); }
           return;
         }
         try {
@@ -173,26 +214,11 @@ export default function ProblemDetail() {
             `${import.meta.env.VITE_API_URL}/submissions/${submissionId}`,
             { withCredentials: true }
           );
-          if (sub.status === 'Pending') {
-            setTimeout(() => poll(attempts + 1), 1500);
-            return;
-          }
-          setSubmitResult({
-            _id: sub._id,
-            status: sub.status,
-            language: sub.language,
-            compilationTime: sub.compilationTime,
-            createdAt: sub.createdAt,
-            failedTestCase: sub.failedTestCase,
-            compilerOutput: ['Compilation Error', 'Runtime Error'].includes(sub.status) ? sub.output : undefined,
-          });
-          setIsSubmitting(false);
-        } catch (err) {
-          setOutput('Error checking submission: ' + (err.response?.data?.error || err.message));
-          setIsSubmitting(false);
-        }
+          if (sub.status !== 'Pending') { finish(sub); return; }
+        } catch { /* keep polling */ }
+        setTimeout(() => poll(attempts + 1), 3000);
       };
-      poll();
+      setTimeout(() => poll(), 3000);
     } catch (error) {
       setOutput('Submit error: ' + (error.response?.data?.error || error.message));
       setIsSubmitting(false);

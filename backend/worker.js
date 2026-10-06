@@ -57,6 +57,17 @@ async function judge(job) {
         compilationTime: executionTime,
         failedTestCase,
     });
+
+    // Returned value is delivered to the API via BullMQ QueueEvents and pushed
+    // to the client over WebSocket.
+    return {
+        submissionId,
+        status,
+        language,
+        compilationTime: executionTime,
+        failedTestCase,
+        compilerOutput: ['Compilation Error', 'Runtime Error'].includes(status) ? failedOutput : undefined,
+    };
 }
 
 mongoose.connect(process.env.MONGO_URI)

@@ -10,8 +10,27 @@ dotenv.config();
 
 const { codeLimiter, aiLimiter, authLimiter } = require('./middleware/rateLimiter');
 const aiCodeReview = require('./aiCodeReview');
+const http = require('http');
+const { Server } = require('socket.io');
+const { QueueEvents } = require('bullmq');
 const { runOnCompiler, SUPPORTED_LANGUAGES } = require('./compilerClient');
-const { submissionQueue } = require('./queue');
+const { submissionQueue, connection } = require('./queue');
+
+const CLIENT_ORIGINS = ['http://localhost:5173', 'https://oj-puce.vercel.app'];
+
+// Shapes a submission document into the result payload the frontend expects.
+function shapeSubmission(sub) {
+    return {
+        submissionId: sub._id.toString(),
+        _id: sub._id,
+        status: sub.status,
+        language: sub.language,
+        compilationTime: sub.compilationTime,
+        createdAt: sub.createdAt,
+        failedTestCase: sub.failedTestCase,
+        compilerOutput: ['Compilation Error', 'Runtime Error'].includes(sub.status) ? sub.output : undefined,
+    };
+}
 
 const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
@@ -33,7 +52,7 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://oj-puce.vercel.app'],
+  origin: CLIENT_ORIGINS,
   credentials: true
 }));
 app.use(cookieParser());
@@ -135,7 +154,34 @@ app.post('/ai-review', aiLimiter, async (req, res) => {
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log('MongoDB connected');
-        app.listen(process.env.PORT || 5000, () =>
+
+        const server = http.createServer(app);
+        const io = new Server(server, {
+            cors: { origin: CLIENT_ORIGINS, credentials: true },
+        });
+
+        // A client subscribes to its submission's room after submitting.
+        io.on('connection', (socket) => {
+            socket.on('subscribe', async (submissionId) => {
+                if (!submissionId) return;
+                socket.join(`sub:${submissionId}`);
+                // If it was already judged before the client subscribed, send it now.
+                try {
+                    const sub = await Submission.findById(submissionId);
+                    if (sub && sub.status !== 'Pending') socket.emit('result', shapeSubmission(sub));
+                } catch { /* ignore */ }
+            });
+        });
+
+        // When the worker finishes a job, push the result to the subscribed client.
+        const queueEvents = new QueueEvents('submissions', { connection });
+        queueEvents.on('completed', ({ returnvalue }) => {
+            let rv = returnvalue;
+            if (typeof rv === 'string') { try { rv = JSON.parse(rv); } catch { return; } }
+            if (rv && rv.submissionId) io.to(`sub:${rv.submissionId}`).emit('result', rv);
+        });
+
+        server.listen(process.env.PORT || 5000, () =>
             console.log(`Server running on port ${process.env.PORT || 5000}`)
         );
     })
